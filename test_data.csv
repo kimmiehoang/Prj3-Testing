@@ -1,0 +1,13 @@
+teacher,moodle,101,Grade must be less than or equal to 100.
+teacher,moodle,95,A
+teacher,moodle,91,A-
+teacher,moodle,88,B+
+teacher,moodle,85,B
+teacher,moodle,81,B-
+teacher,moodle,78,C+
+teacher,moodle,75,C
+teacher,moodle,71,C-
+teacher,moodle,68,D+
+teacher,moodle,63,D
+teacher,moodle,40,F
+teacher,moodle,-2,Grade must be greater than or equal to zero.
