@@ -5,16 +5,14 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
 
 public class GradeTestingTest {
 
@@ -50,7 +48,8 @@ public class GradeTestingTest {
     }
 
     public void performTest(String username, String password, String score, String expectedLetterGrade) {
-        JavascriptExecutor js = (JavascriptExecutor) driver;
+        System.out.println("-----------------------Test begin--------------------------");
+
         driver.get("https://school.moodledemo.net/?lang=en");
 
         WebElement loginLink = wait.until(ExpectedConditions.elementToBeClickable(By.linkText("Log in")));
@@ -113,24 +112,45 @@ public class GradeTestingTest {
                 .until(ExpectedConditions.elementToBeClickable(By.name("savechanges")));
         saveButton.click();
 
-        WebElement errorGradeElement = driver.findElement(By.id("id_error_grade"));
-        if (errorGradeElement.isDisplayed()) {
-            System.out.println("Error message displayed: " + errorGradeElement.getText());
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        String errorGradingMessage = "";
+        try {
+            WebElement errorGradeElement = wait
+                    .until(ExpectedConditions.presenceOfElementLocated(By.id("id_error_grade")));
+            if (errorGradeElement.isDisplayed()) {
+                errorGradingMessage = errorGradeElement.getAttribute("textContent");
+            }
+        } catch (NoSuchElementException e) {
+            errorGradingMessage = "Test Error: Element not found!";
         }
 
         WebElement currentGradeLetter = driver.findElement(By.xpath(
                 "/html/body/div[5]/section/div[2]/div[3]/div/div[2]/form/fieldset/div[2]/div[2]/div[2]/div[1]/span/a"));
         currentGradeLetter.click();
 
-        WebElement letterGradeElement = driver.findElement(By.xpath(
-                "/html/body/div[2]/div[4]/div/div[3]/div/section/div/div[2]/table/tbody/tr[3]/td[3]/div/div[1]/div[1]/div/span"));
+        WebElement letterGradeElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
+                "/html/body/div[2]/div[4]/div/div[3]/div/section/div/div[2]/table/tbody/tr[3]/td[3]/div/div[1]/div[1]/div/span")));
         String calculatedLetterGrade = letterGradeElement.getText();
+
         if (calculatedLetterGrade.equals(expectedLetterGrade)) {
             System.out.println("Test Passed - Expected letter grade: " + expectedLetterGrade +
                     ", Actual letter grade: " + calculatedLetterGrade);
-        } else {
+        } else if (expectedLetterGrade.length() < 3) {
             System.out.println("Test Failed - Expected letter grade: " + expectedLetterGrade +
                     ", Actual letter grade: " + calculatedLetterGrade);
+        } else {
+            if (errorGradingMessage.contains(expectedLetterGrade)) {
+                System.out.println("Test Passed - Expected message: " + expectedLetterGrade +
+                        ", Actual message: " + errorGradingMessage);
+            } else {
+                System.out.println("Test Failed - Expected message: " + expectedLetterGrade +
+                        ", Actual message: " + errorGradingMessage);
+            }
         }
 
         WebElement logoutLink = wait.until(
@@ -141,7 +161,8 @@ public class GradeTestingTest {
                 .findElement(By.xpath("/html/body/div[2]/nav/div/div[2]/div[5]/div/div/div/div/div/div[1]/a[10]"));
         logout.click();
 
-        System.out.println("Test complete");
+        System.out.println("-----------------------Test complete-----------------------");
+        System.out.println(" ");
     }
 
     @After
